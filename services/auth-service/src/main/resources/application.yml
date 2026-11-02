@@ -10,16 +10,51 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: validate
+      # O schema é do Liquibase; a conformidade das entidades é coberta pelos testes de integração.
+      ddl-auto: none
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+    # "dev" acrescenta instituições e usuários de exemplo (ver 900-dev-seed.sql)
+    contexts: ${LIQUIBASE_CONTEXTS:default}
   threads:
     virtual:
       enabled: true
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
 
 server:
   port: ${SERVER_PORT:8081}
   shutdown: graceful
+
+hub:
+  auth:
+    encryption-key: ${HUB_AUTH_ENCRYPTION_KEY:}
+    portal-url: ${HUB_PORTAL_URL:http://localhost:4200}
+    bootstrap-admin:
+      email: ${HUB_AUTH_BOOTSTRAP_ADMIN_EMAIL:}
+      password: ${HUB_AUTH_BOOTSTRAP_ADMIN_PASSWORD:}
+  security:
+    public-paths:
+      - /api/v1/auth/login
+      - /api/v1/auth/refresh
+      - /api/v1/auth/logout
+      - /api/v1/auth/password-reset/**
+      - /oauth2/token
+      - /oauth2/jwks
+      - /v3/api-docs/**
+      - /swagger-ui/**
+      - /swagger-ui.html
+
+springdoc:
+  api-docs:
+    enabled: ${OPENAPI_ENABLED:true}
 
 management:
   endpoints:
@@ -30,6 +65,10 @@ management:
     health:
       probes:
         enabled: true
+  health:
+    mail:
+      # SMTP fora do ar não deve tirar o serviço de autenticação do balanceador.
+      enabled: false
   metrics:
     tags:
       application: ${spring.application.name}

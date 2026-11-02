@@ -8,9 +8,9 @@ Arquitetura em **microsserviços Spring Boot 3 (Java 21)**, um banco PostgreSQL 
 
 | Etapa | Escopo | Situação |
 | --- | --- | --- |
-| 1 | Arquitetura, estrutura dos projetos, banco de dados, infraestrutura local | **Concluída** |
-| 2 | Autenticação, usuários, papéis, permissões, multi-tenancy | Próxima |
-| 3 | Bancos e registradoras | — |
+| 1 | Arquitetura, estrutura dos projetos, banco de dados, infraestrutura local | Implementada · aguardando o primeiro `mvn verify` |
+| 2 | Autenticação, usuários, papéis, permissões, multi-tenancy | Implementada · aguardando o primeiro `mvn verify` |
+| 3 | Bancos e registradoras | Próxima |
 | 4 | Contratos e documentos | — |
 | 5 | RabbitMQ, processamento assíncrono, Outbox | — |
 | 6 | Motor de roteamento | — |
@@ -18,6 +18,8 @@ Arquitetura em **microsserviços Spring Boot 3 (Java 21)**, um banco PostgreSQL 
 | 8 | Portais Angular | — |
 | 9 | Dashboards, relatórios, auditoria, observabilidade | — |
 | 10 | Testes, documentação, conteinerização final | — |
+
+> **Atenção:** até aqui o código foi escrito sem acesso ao Maven Central, então ainda não passou por compilação completa nem pelos testes do Maven. As migrações SQL e as regras de domínio (Java puro) foram verificadas à parte, num PostgreSQL real e com `javac`. A primeira tarefa antes da Etapa 3 é rodar `mvn verify` e corrigir o que aparecer.
 
 ## Estrutura
 
@@ -28,8 +30,10 @@ projeto-java/
 ├── docker-compose.yml            infraestrutura + 11 serviços
 ├── infra/                        PostgreSQL, RabbitMQ, Prometheus, Grafana
 ├── libs/
+│   ├── hub-commons               Java puro: UUID v7, AES-GCM, tokens seguros, erros de domínio
 │   ├── hub-starter-observability Actuator, Prometheus, OpenTelemetry, correlation id
-│   ├── hub-starter-messaging     tabelas do Outbox e de idempotência (relay na Etapa 5)
+│   ├── hub-starter-security      JWT, permissões, Problem Details, tenant por conexão (RLS)
+│   ├── hub-starter-messaging     Outbox (gravação); relay e consumidores na Etapa 5
 │   ├── hub-database-support      funções SQL comuns: imutabilidade, partições, validações
 │   └── hub-test-support          Testcontainers e regras ArchUnit compartilhadas
 ├── services/
@@ -72,6 +76,32 @@ docker compose up -d postgres rabbitmq jaeger prometheus grafana
 
 Cada serviço aplica as próprias migrações Liquibase ao subir.
 
+### Acesso em desenvolvimento
+
+Com `LIQUIBASE_CONTEXTS=default,dev` (padrão do `.env.example`) o auth-service cria três instituições e um usuário por perfil. Senha de todos: `Hub@dev2026!`
+
+| Perfil | E-mail |
+| --- | --- |
+| SUPER_ADMIN | superadmin@hub.dev |
+| HUB_OPERATOR | operador@hub.dev |
+| HUB_AUDITOR | auditor@hub.dev |
+| BANK_ADMIN / OPERATOR / VIEWER (Banco Exemplo) | admin@ / operador@ / consulta@banco-exemplo.dev |
+| BANK_ADMIN (Banco Teste) | admin@banco-teste.dev |
+| REGISTRY_ADMIN / OPERATOR / VIEWER | admin@ / operador@ / consulta@registradora-exemplo.dev |
+
+```bash
+# Login
+curl -s localhost:8080/api/v1/auth/login -H 'Content-Type: application/json' \
+     -d '{"email":"admin@banco-exemplo.dev","password":"Hub@dev2026!"}'
+
+# Quem sou eu (use o accessToken da resposta)
+curl -s localhost:8080/api/v1/auth/me -H "Authorization: Bearer $TOKEN"
+```
+
+Os e-mails de ativação e de redefinição de senha aparecem no Mailpit (http://localhost:8025). A documentação interativa da API de autenticação fica em http://localhost:8081/swagger-ui.html.
+
+Fora do desenvolvimento, use `LIQUIBASE_CONTEXTS=default`, gere uma chave própria (`openssl rand -base64 32`) para `HUB_AUTH_ENCRYPTION_KEY` e crie o primeiro administrador com `HUB_AUTH_BOOTSTRAP_ADMIN_EMAIL` e `HUB_AUTH_BOOTSTRAP_ADMIN_PASSWORD`.
+
 | O quê | Endereço | Acesso (dev) |
 | --- | --- | --- |
 | API Gateway | http://localhost:8080 | — |
@@ -80,6 +110,7 @@ Cada serviço aplica as próprias migrações Liquibase ao subir.
 | Grafana | http://localhost:3000 | admin / admin_dev |
 | Jaeger | http://localhost:16686 | — |
 | Prometheus | http://localhost:9090 | — |
+| Mailpit (e-mails) | http://localhost:8025 | — |
 | PostgreSQL | localhost:5432 | hub_&lt;serviço&gt; / hub_&lt;serviço&gt; |
 
 ## Testes
@@ -89,7 +120,12 @@ mvn test      # unitários e ArchUnit (sem Docker)
 mvn verify    # + testes de integração com PostgreSQL real via Testcontainers (requer Docker)
 ```
 
-Os testes de integração sobem cada serviço contra um PostgreSQL 18 real, aplicam todas as migrações, validam o schema e verificam regras que o banco garante sozinho: histórico imutável, unicidade do `external_id` por banco, estados válidos, CNPJ alfanumérico e particionamento mensal.
+Os testes de integração sobem cada serviço contra um PostgreSQL 18 real e cobrem:
+
+- migrações e regras que o banco garante sozinho: histórico imutável, unicidade do `external_id` por banco, estados válidos, CNPJ alfanumérico, particionamento mensal;
+- autenticação ponta a ponta: login, bloqueio após 5 tentativas, rotação do refresh token e revogação da sessão no reuso, ativação e redefinição por e-mail, client credentials dos bancos;
+- isolamento: um banco não vê nem altera usuários, contratos ou documentos de outro; a registradora só vê o que foi encaminhado a ela; sem tenant, nada é visível;
+- gateway: token obrigatório na borda, limite de requisições (429), CORS.
 
 ## Convenções
 

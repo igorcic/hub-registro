@@ -2,7 +2,7 @@
 #   cp .env.example .env
 #   docker compose up -d --build
 # Gateway: http://localhost:8080 · RabbitMQ: http://localhost:15672 · Grafana: http://localhost:3000
-# Jaeger: http://localhost:16686 · Prometheus: http://localhost:9090
+# Jaeger: http://localhost:16686 · Prometheus: http://localhost:9090 · E-mails (Mailpit): http://localhost:8025
 
 name: hub-registro
 
@@ -15,6 +15,7 @@ x-service: &service
     rabbitmq:
       condition: service_healthy
   environment: &service-env
+    AUTH_JWKS_URI: http://auth-service:8081/oauth2/jwks
     TRACING_ENABLED: "true"
     OTLP_TRACING_ENDPOINT: http://jaeger:4318/v1/traces
     LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
@@ -55,6 +56,25 @@ services:
       timeout: 10s
       retries: 12
 
+  redis:
+    image: ${REDIS_IMAGE:-redis:7.4-alpine}
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mailpit:
+    image: ${MAILPIT_IMAGE:-axllent/mailpit:v1.27}
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
   jaeger:
     image: ${JAEGER_IMAGE:-jaegertracing/jaeger:2.9.0}
     restart: unless-stopped
@@ -91,6 +111,7 @@ services:
         SERVICE: api-gateway
     image: hub-registro/api-gateway:dev
     depends_on:
+      - redis
       - auth-service
       - bank-service
       - registry-service
@@ -105,6 +126,8 @@ services:
       - "8080:8080"
     environment:
       <<: *service-env
+      REDIS_HOST: redis
+      HUB_CORS_ALLOWED_ORIGINS: ${HUB_CORS_ALLOWED_ORIGINS:-http://localhost:4200}
       AUTH_SERVICE_URL: http://auth-service:8081
       BANK_SERVICE_URL: http://bank-service:8082
       REGISTRY_SERVICE_URL: http://registry-service:8083
@@ -130,6 +153,13 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/hub_auth
       DB_USERNAME: hub_auth
       DB_PASSWORD: ${HUB_AUTH_DB_PASSWORD:-hub_auth}
+      HUB_AUTH_ENCRYPTION_KEY: ${HUB_AUTH_ENCRYPTION_KEY:?defina HUB_AUTH_ENCRYPTION_KEY no .env}
+      LIQUIBASE_CONTEXTS: ${LIQUIBASE_CONTEXTS:-default,dev}
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      HUB_PORTAL_URL: ${HUB_PORTAL_URL:-http://localhost:4200}
+      HUB_AUTH_BOOTSTRAP_ADMIN_EMAIL: ${HUB_AUTH_BOOTSTRAP_ADMIN_EMAIL:-}
+      HUB_AUTH_BOOTSTRAP_ADMIN_PASSWORD: ${HUB_AUTH_BOOTSTRAP_ADMIN_PASSWORD:-}
 
   bank-service:
     <<: *service

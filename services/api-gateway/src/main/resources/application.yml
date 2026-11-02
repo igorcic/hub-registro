@@ -1,6 +1,18 @@
 spring:
   application:
     name: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${AUTH_JWKS_URI:http://localhost:8081/oauth2/jwks}
+          issuer-uri: https://auth.hub-registro.local
+          audiences: hub-registro
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 500ms
   cloud:
     gateway:
       server:
@@ -9,7 +21,7 @@ spring:
             - id: auth-service
               uri: ${AUTH_SERVICE_URL:http://localhost:8081}
               predicates:
-                - Path=/api/v1/auth/**,/api/v1/users/**,/api/v1/roles/**,/api/v1/api-clients/**
+                - Path=/api/v1/auth/**,/api/v1/users/**,/api/v1/roles/**,/api/v1/api-clients/**,/oauth2/token
             - id: bank-service
               uri: ${BANK_SERVICE_URL:http://localhost:8082}
               predicates:
@@ -47,6 +59,22 @@ spring:
               predicates:
                 - Path=/api/v1/operations/**,/api/v1/reports/**,/api/v1/dashboards/**
 
+hub:
+  gateway:
+    public-paths:
+      - /api/v1/auth/login
+      - /api/v1/auth/refresh
+      - /api/v1/auth/logout
+      - /api/v1/auth/password-reset/**
+      - /oauth2/token
+      # Webhooks das registradoras: autenticados por assinatura HMAC no integration-service
+      - /api/v1/webhooks/**
+    cors-allowed-origins: ${HUB_CORS_ALLOWED_ORIGINS:http://localhost:4200}
+    rate-limit:
+      enabled: ${RATE_LIMIT_ENABLED:true}
+      user-per-minute: 300
+      anonymous-per-minute: 30
+
 server:
   port: ${SERVER_PORT:8080}
   shutdown: graceful
@@ -60,6 +88,10 @@ management:
     health:
       probes:
         enabled: true
+  health:
+    redis:
+      # Redis fora do ar desliga só o limitador (falha aberta), não o gateway.
+      enabled: false
   metrics:
     tags:
       application: ${spring.application.name}

@@ -18,7 +18,9 @@
     <name>Hub de Registro de Contratos Imobiliários</name>
 
     <modules>
+        <module>libs/hub-commons</module>
         <module>libs/hub-starter-observability</module>
+        <module>libs/hub-starter-security</module>
         <module>libs/hub-starter-messaging</module>
         <module>libs/hub-database-support</module>
         <module>libs/hub-test-support</module>
@@ -40,6 +42,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud.version>2025.0.0</spring-cloud.version>
         <archunit.version>1.4.1</archunit.version>
+        <springdoc.version>2.8.9</springdoc.version>
+        <bouncycastle.version>1.80</bouncycastle.version>
     </properties>
 
     <dependencyManagement>
@@ -55,6 +59,26 @@
                 <groupId>com.tngtech.archunit</groupId>
                 <artifactId>archunit-junit5</artifactId>
                 <version>${archunit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.hubregistro</groupId>
+                <artifactId>hub-commons</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>br.com.hubregistro</groupId>
+                <artifactId>hub-starter-security</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>br.com.hubregistro</groupId>

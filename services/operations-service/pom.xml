@@ -42,6 +42,10 @@
         </dependency>
         <dependency>
             <groupId>br.com.hubregistro</groupId>
+            <artifactId>hub-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>br.com.hubregistro</groupId>
             <artifactId>hub-starter-messaging</artifactId>
         </dependency>
         <dependency>
@@ -52,6 +56,11 @@
         <dependency>
             <groupId>br.com.hubregistro</groupId>
             <artifactId>hub-test-support</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

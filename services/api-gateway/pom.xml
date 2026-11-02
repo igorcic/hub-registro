@@ -12,7 +12,7 @@
 
     <artifactId>api-gateway</artifactId>
     <name>api-gateway</name>
-    <description>Entrada única: roteamento para os serviços, correlation id; JWT e rate limit na Etapa 2</description>
+    <description>Entrada única: roteamento, validação de JWT, limite de requisições, CORS e correlation id</description>
 
     <dependencies>
         <dependency>
@@ -23,6 +23,14 @@
             <groupId>br.com.hubregistro</groupId>
             <artifactId>hub-starter-observability</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -32,6 +40,11 @@
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -12,6 +12,36 @@
 
     <artifactId>hub-starter-messaging</artifactId>
     <name>hub-starter-messaging</name>
-    <description>Mensageria confiável: tabelas do Outbox e de idempotência (Etapa 1); relay, consumidores idempotentes, retry e DLQ (Etapa 5)</description>
+    <description>Mensageria confiável: tabelas e gravação no Outbox (Etapas 1 e 2); relay, consumidores idempotentes, retry e DLQ (Etapa 5)</description>
 
+    <dependencies>
+        <dependency>
+            <groupId>br.com.hubregistro</groupId>
+            <artifactId>hub-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+    </dependencies>
 </project>

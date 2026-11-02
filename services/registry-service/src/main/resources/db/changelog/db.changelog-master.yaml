@@ -3,6 +3,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/common/001-functions.sql
   - include:
+      file: db/changelog/common/002-tenant.sql
+  - include:
       file: db/changelog/messaging/001-outbox.sql
   # Schema próprio deste serviço
   - include:

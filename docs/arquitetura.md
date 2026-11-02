@@ -27,6 +27,7 @@ Sistemas bancos ─┘        (REST /api/v1)     └─ RabbitMQ 4.1 (eventos e 
 | [0001](adr/0001-microsservicos-em-monorepo.md) | Microsserviços por contexto delimitado, em monorepo Maven |
 | [0002](adr/0002-banco-por-servico.md) | Um banco PostgreSQL por serviço; modelagem, imutabilidade e particionamento |
 | [0003](adr/0003-mensageria-confiavel.md) | RabbitMQ com Outbox, idempotência, retry com backoff e DLQ |
+| [0004](adr/0004-seguranca-e-multi-tenancy.md) | Autenticação, RBAC e isolamento entre instituições (aplicação + Row-Level Security) |
 
 ## Ciclo de vida do contrato
 
