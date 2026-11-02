@@ -1,0 +1,72 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: auth-service
+              uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/v1/auth/**,/api/v1/users/**,/api/v1/roles/**,/api/v1/api-clients/**
+            - id: bank-service
+              uri: ${BANK_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/v1/banks/**
+            - id: registry-service
+              uri: ${REGISTRY_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/v1/registries/**
+            - id: contract-service
+              uri: ${CONTRACT_SERVICE_URL:http://localhost:8084}
+              predicates:
+                - Path=/api/v1/contracts/**
+            - id: document-service
+              uri: ${DOCUMENT_SERVICE_URL:http://localhost:8085}
+              predicates:
+                - Path=/api/v1/documents/**
+            - id: routing-service
+              uri: ${ROUTING_SERVICE_URL:http://localhost:8086}
+              predicates:
+                - Path=/api/v1/routing-rules/**
+            - id: integration-service
+              uri: ${INTEGRATION_SERVICE_URL:http://localhost:8087}
+              predicates:
+                - Path=/api/v1/integrations/**,/api/v1/webhooks/**
+            - id: notification-service
+              uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8088}
+              predicates:
+                - Path=/api/v1/notifications/**
+            - id: audit-service
+              uri: ${AUDIT_SERVICE_URL:http://localhost:8089}
+              predicates:
+                - Path=/api/v1/audit/**
+            - id: operations-service
+              uri: ${OPERATIONS_SERVICE_URL:http://localhost:8090}
+              predicates:
+                - Path=/api/v1/operations/**,/api/v1/reports/**,/api/v1/dashboards/**
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,gateway
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    enabled: ${TRACING_ENABLED:false}
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:1.0}
+  otlp:
+    tracing:
+      endpoint: ${OTLP_TRACING_ENDPOINT:http://localhost:4318/v1/traces}

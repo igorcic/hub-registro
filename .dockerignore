@@ -1,0 +1,9 @@
+**/target
+**/node_modules
+.git
+.idea
+.vscode
+*.iml
+frontend
+docs
+infra

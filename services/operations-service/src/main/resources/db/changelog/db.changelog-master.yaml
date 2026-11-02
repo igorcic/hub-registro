@@ -1,0 +1,9 @@
+databaseChangeLog:
+  # Comuns a todos os bancos (bibliotecas hub-database-support e hub-starter-messaging)
+  - include:
+      file: db/changelog/common/001-functions.sql
+  - include:
+      file: db/changelog/messaging/001-outbox.sql
+  # Schema próprio deste serviço
+  - include:
+      file: db/changelog/v1/001-operations-schema.sql

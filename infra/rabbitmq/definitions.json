@@ -1,0 +1,672 @@
+{
+  "rabbit_version": "4.1.0",
+  "users": [
+    {
+      "name": "hub_admin",
+      "password_hash": "ozNvM8zjtpH+Kjs+0DSARYDffZXy79MPF+LQYrWfL0MPdQhN",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "administrator"
+      ]
+    },
+    {
+      "name": "hub_app",
+      "password_hash": "qmPiSLPLPIEz2S4aWkrVsc1/brGd3iXzQyFnG/cTbrHr9Qmr",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "monitoring"
+      ]
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "hub"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "hub_admin",
+      "vhost": "hub",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "hub_app",
+      "vhost": "hub",
+      "configure": "^$",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "hub.contract.events",
+      "vhost": "hub",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "hub.contract.commands",
+      "vhost": "hub",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "hub.platform.events",
+      "vhost": "hub",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "hub.retry",
+      "vhost": "hub",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "hub.retry.return",
+      "vhost": "hub",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "hub.dlx",
+      "vhost": "hub",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "contract.received",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "contract",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "contract.validation",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "contract",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "contract.processing",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "contract",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "contract.registry.dispatch",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "contract",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "contract.registry.response",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "contract",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "contract.status.update",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "contract",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "contract.notification",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "contract",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "integration.bank-callbacks",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "contract",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "document.contract-access",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "contract",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "operations.contract-projection",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "contract",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "auth.institution-replica",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "platform",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "contract.institution-replica",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "platform",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "routing.registry-replica",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "platform",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "notification.operational-alerts",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "platform",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "audit.events",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "hub.dlx",
+        "x-dead-letter-routing-key": "platform",
+        "x-delivery-limit": 10
+      }
+    },
+    {
+      "name": "contract.retry.10s",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-message-ttl": 10000,
+        "x-dead-letter-exchange": "hub.retry.return"
+      }
+    },
+    {
+      "name": "contract.retry.1m",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-message-ttl": 60000,
+        "x-dead-letter-exchange": "hub.retry.return"
+      }
+    },
+    {
+      "name": "contract.retry.5m",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-message-ttl": 300000,
+        "x-dead-letter-exchange": "hub.retry.return"
+      }
+    },
+    {
+      "name": "contract.retry.30m",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "hub.retry.return"
+      }
+    },
+    {
+      "name": "contract.dead-letter",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "platform.dead-letter",
+      "vhost": "hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "source": "hub.contract.events",
+      "vhost": "hub",
+      "destination": "contract.received",
+      "destination_type": "queue",
+      "routing_key": "contract.received",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "contract.received",
+      "destination_type": "queue",
+      "routing_key": "*.contract.received",
+      "arguments": {}
+    },
+    {
+      "source": "hub.contract.commands",
+      "vhost": "hub",
+      "destination": "contract.validation",
+      "destination_type": "queue",
+      "routing_key": "contract.validation",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "contract.validation",
+      "destination_type": "queue",
+      "routing_key": "*.contract.validation",
+      "arguments": {}
+    },
+    {
+      "source": "hub.contract.commands",
+      "vhost": "hub",
+      "destination": "contract.processing",
+      "destination_type": "queue",
+      "routing_key": "contract.processing",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "contract.processing",
+      "destination_type": "queue",
+      "routing_key": "*.contract.processing",
+      "arguments": {}
+    },
+    {
+      "source": "hub.contract.commands",
+      "vhost": "hub",
+      "destination": "contract.registry.dispatch",
+      "destination_type": "queue",
+      "routing_key": "contract.registry.dispatch",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "contract.registry.dispatch",
+      "destination_type": "queue",
+      "routing_key": "*.contract.registry.dispatch",
+      "arguments": {}
+    },
+    {
+      "source": "hub.contract.commands",
+      "vhost": "hub",
+      "destination": "contract.registry.response",
+      "destination_type": "queue",
+      "routing_key": "contract.registry.response",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "contract.registry.response",
+      "destination_type": "queue",
+      "routing_key": "*.contract.registry.response",
+      "arguments": {}
+    },
+    {
+      "source": "hub.contract.commands",
+      "vhost": "hub",
+      "destination": "contract.status.update",
+      "destination_type": "queue",
+      "routing_key": "contract.status.update",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "contract.status.update",
+      "destination_type": "queue",
+      "routing_key": "*.contract.status.update",
+      "arguments": {}
+    },
+    {
+      "source": "hub.contract.events",
+      "vhost": "hub",
+      "destination": "contract.notification",
+      "destination_type": "queue",
+      "routing_key": "contract.status.changed",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "contract.notification",
+      "destination_type": "queue",
+      "routing_key": "*.contract.notification",
+      "arguments": {}
+    },
+    {
+      "source": "hub.contract.events",
+      "vhost": "hub",
+      "destination": "integration.bank-callbacks",
+      "destination_type": "queue",
+      "routing_key": "contract.status.changed",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "integration.bank-callbacks",
+      "destination_type": "queue",
+      "routing_key": "*.integration.bank-callbacks",
+      "arguments": {}
+    },
+    {
+      "source": "hub.contract.events",
+      "vhost": "hub",
+      "destination": "document.contract-access",
+      "destination_type": "queue",
+      "routing_key": "contract.received",
+      "arguments": {}
+    },
+    {
+      "source": "hub.contract.events",
+      "vhost": "hub",
+      "destination": "document.contract-access",
+      "destination_type": "queue",
+      "routing_key": "contract.status.changed",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "document.contract-access",
+      "destination_type": "queue",
+      "routing_key": "*.document.contract-access",
+      "arguments": {}
+    },
+    {
+      "source": "hub.contract.events",
+      "vhost": "hub",
+      "destination": "operations.contract-projection",
+      "destination_type": "queue",
+      "routing_key": "contract.#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "operations.contract-projection",
+      "destination_type": "queue",
+      "routing_key": "*.operations.contract-projection",
+      "arguments": {}
+    },
+    {
+      "source": "hub.platform.events",
+      "vhost": "hub",
+      "destination": "auth.institution-replica",
+      "destination_type": "queue",
+      "routing_key": "bank.#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.platform.events",
+      "vhost": "hub",
+      "destination": "auth.institution-replica",
+      "destination_type": "queue",
+      "routing_key": "registry.#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "auth.institution-replica",
+      "destination_type": "queue",
+      "routing_key": "*.auth.institution-replica",
+      "arguments": {}
+    },
+    {
+      "source": "hub.platform.events",
+      "vhost": "hub",
+      "destination": "contract.institution-replica",
+      "destination_type": "queue",
+      "routing_key": "bank.#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.platform.events",
+      "vhost": "hub",
+      "destination": "contract.institution-replica",
+      "destination_type": "queue",
+      "routing_key": "registry.#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "contract.institution-replica",
+      "destination_type": "queue",
+      "routing_key": "*.contract.institution-replica",
+      "arguments": {}
+    },
+    {
+      "source": "hub.platform.events",
+      "vhost": "hub",
+      "destination": "routing.registry-replica",
+      "destination_type": "queue",
+      "routing_key": "registry.#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.platform.events",
+      "vhost": "hub",
+      "destination": "routing.registry-replica",
+      "destination_type": "queue",
+      "routing_key": "integration.health.#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "routing.registry-replica",
+      "destination_type": "queue",
+      "routing_key": "*.routing.registry-replica",
+      "arguments": {}
+    },
+    {
+      "source": "hub.platform.events",
+      "vhost": "hub",
+      "destination": "notification.operational-alerts",
+      "destination_type": "queue",
+      "routing_key": "integration.health.#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "notification.operational-alerts",
+      "destination_type": "queue",
+      "routing_key": "*.notification.operational-alerts",
+      "arguments": {}
+    },
+    {
+      "source": "hub.contract.events",
+      "vhost": "hub",
+      "destination": "audit.events",
+      "destination_type": "queue",
+      "routing_key": "#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.platform.events",
+      "vhost": "hub",
+      "destination": "audit.events",
+      "destination_type": "queue",
+      "routing_key": "#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry.return",
+      "vhost": "hub",
+      "destination": "audit.events",
+      "destination_type": "queue",
+      "routing_key": "*.audit.events",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry",
+      "vhost": "hub",
+      "destination": "contract.retry.10s",
+      "destination_type": "queue",
+      "routing_key": "10s.#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry",
+      "vhost": "hub",
+      "destination": "contract.retry.1m",
+      "destination_type": "queue",
+      "routing_key": "1m.#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry",
+      "vhost": "hub",
+      "destination": "contract.retry.5m",
+      "destination_type": "queue",
+      "routing_key": "5m.#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.retry",
+      "vhost": "hub",
+      "destination": "contract.retry.30m",
+      "destination_type": "queue",
+      "routing_key": "30m.#",
+      "arguments": {}
+    },
+    {
+      "source": "hub.dlx",
+      "vhost": "hub",
+      "destination": "contract.dead-letter",
+      "destination_type": "queue",
+      "routing_key": "contract",
+      "arguments": {}
+    },
+    {
+      "source": "hub.dlx",
+      "vhost": "hub",
+      "destination": "platform.dead-letter",
+      "destination_type": "queue",
+      "routing_key": "platform",
+      "arguments": {}
+    }
+  ]
+}

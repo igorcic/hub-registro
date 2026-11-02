@@ -1,0 +1,24 @@
+# Build
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Ambiente local
+.env
+*.log
+
+# Frontend (Etapa 8)
+node_modules/
+dist/
+.angular/
+
+# SO
+.DS_Store
+Thumbs.db
