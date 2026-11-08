@@ -19,7 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Sobe o serviço contra um PostgreSQL real: as migrações Liquibase precisam aplicar sem erro,
  * o Hibernate precisa validar o schema e o health check precisa responder UP.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = "hub.integration.encryption-key=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")
 @Import(PostgresTestcontainersConfiguration.class)
 class IntegrationSchemaIT {
 

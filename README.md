@@ -10,9 +10,9 @@ Arquitetura em **microsserviços Spring Boot 3 (Java 21)**, um banco PostgreSQL 
 | --- | --- | --- |
 | 1 | Arquitetura, estrutura dos projetos, banco de dados, infraestrutura local | **Concluída** · `mvn verify` verde |
 | 2 | Autenticação, usuários, papéis, permissões, multi-tenancy | **Concluída** · `mvn verify` verde |
-| 3 | Bancos e registradoras | Próxima |
+| 3 | Bancos, registradoras, configuração das integrações + base da mensageria (Outbox relay, consumidores idempotentes, retry/DLQ, réplicas) | Código pronto · aguardando `mvn verify` |
 | 4 | Contratos e documentos | — |
-| 5 | RabbitMQ, processamento assíncrono, Outbox | — |
+| 5 | Processamento assíncrono do contrato (filas do fluxo, orquestração) | — |
 | 6 | Motor de roteamento | — |
 | 7 | Integrações externas e simulador de registradoras | — |
 | 8 | Portais Angular | — |
@@ -31,7 +31,7 @@ projeto-java/
 │   ├── hub-commons               Java puro: UUID v7, AES-GCM, tokens seguros, erros de domínio
 │   ├── hub-starter-observability Actuator, Prometheus, OpenTelemetry, correlation id
 │   ├── hub-starter-security      JWT, permissões, Problem Details, tenant por conexão (RLS)
-│   ├── hub-starter-messaging     Outbox (gravação); relay e consumidores na Etapa 5
+│   ├── hub-starter-messaging     Outbox, relay com confirmação, consumidor idempotente com retry/DLQ
 │   ├── hub-database-support      funções SQL comuns: imutabilidade, partições, validações
 │   └── hub-test-support          Testcontainers e regras ArchUnit compartilhadas
 ├── services/
@@ -102,9 +102,27 @@ curl -s localhost:8080/api/v1/auth/login -H 'Content-Type: application/json' \
 curl -s localhost:8080/api/v1/auth/me -H "Authorization: Bearer $TOKEN"
 ```
 
+### Bancos, registradoras e integrações (Etapa 3)
+
+| Serviço | API | Swagger |
+| --- | --- | --- |
+| bank-service | `/api/v1/banks` (cadastro, contatos, status com histórico) | http://localhost:8082/swagger-ui.html |
+| registry-service | `/api/v1/registries` (endereço, tipos de contrato, regiões atendidas, contatos técnicos, status) | http://localhost:8083/swagger-ui.html |
+| integration-service | `/api/v1/integrations/registries/{id}` (endpoints, credenciais cifradas, certificados, timeout/retry/limite, teste de conectividade, saúde) e `/api/v1/integrations/banks/{id}` (callback) | http://localhost:8087/swagger-ui.html |
+
+Cadastros publicam eventos (`bank.*`, `registry.*`, `integration.*`) pelo Outbox. As réplicas são atualizadas sem chamada síncrona:
+
+- auth-service (`auth.institution-replica`): banco ou registradora suspensa deixa de fazer login;
+- contract-service (`contract.institution-replica`): status das instituições para validar contratos;
+- routing-service (`routing.registry-replica`): status, tipos, regiões, capacidade e saúde da integração de cada registradora.
+
+Evento fora de ordem (versão menor) e reentrega (mesmo `message_id`) são ignorados; erro transitório volta após 10 s, 1 min, 5 min e 30 min; erro permanente vai para `platform.dead-letter`.
+
+Credenciais e certificados das integrações são cifrados com AES-256-GCM usando `HUB_INTEGRATION_ENCRYPTION_KEY` e nunca voltam na API (só a indicação de que existem).
+
 Os e-mails de ativação e de redefinição de senha aparecem no Mailpit (http://localhost:8025). A documentação interativa da API de autenticação fica em http://localhost:8081/swagger-ui.html.
 
-Fora do desenvolvimento, use `LIQUIBASE_CONTEXTS=default`, gere uma chave própria (`openssl rand -base64 32`) para `HUB_AUTH_ENCRYPTION_KEY` e crie o primeiro administrador com `HUB_AUTH_BOOTSTRAP_ADMIN_EMAIL` e `HUB_AUTH_BOOTSTRAP_ADMIN_PASSWORD`.
+Fora do desenvolvimento, use `LIQUIBASE_CONTEXTS=default`, gere chaves próprias (`openssl rand -base64 32`) para `HUB_AUTH_ENCRYPTION_KEY` e `HUB_INTEGRATION_ENCRYPTION_KEY` e crie o primeiro administrador com `HUB_AUTH_BOOTSTRAP_ADMIN_EMAIL` e `HUB_AUTH_BOOTSTRAP_ADMIN_PASSWORD`.
 
 | O quê | Endereço | Acesso (dev) |
 | --- | --- | --- |
@@ -129,7 +147,9 @@ Os testes de integração sobem cada serviço contra um PostgreSQL 18 real e cob
 - migrações e regras que o banco garante sozinho: histórico imutável, unicidade do `external_id` por banco, estados válidos, CNPJ alfanumérico, particionamento mensal;
 - autenticação ponta a ponta: login, bloqueio após 5 tentativas, rotação do refresh token e revogação da sessão no reuso, ativação e redefinição por e-mail, client credentials dos bancos;
 - isolamento: um banco não vê nem altera usuários, contratos ou documentos de outro; a registradora só vê o que foi encaminhado a ela; sem tenant, nada é visível;
-- gateway: token obrigatório na borda, limite de requisições (429), CORS.
+- gateway: token obrigatório na borda, limite de requisições (429), CORS;
+- cadastros: CNPJ alfanumérico, histórico de status, isolamento (banco só vê o próprio cadastro), segredos nunca devolvidos, teste de conectividade contra um servidor HTTP falso com API key e mTLS;
+- mensageria com RabbitMQ real: relay publica com confirmação e a mensagem chega às filas de réplica; réplicas ignoram evento antigo e repetido; evento inválido vai para a DLQ.
 
 ## Convenções
 

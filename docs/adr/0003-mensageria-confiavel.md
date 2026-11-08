@@ -18,3 +18,10 @@
 | `hub.platform.events` | topic | cadastro de bancos e registradoras, saúde das integrações |
 | `hub.retry` / `hub.retry.return` | topic | espera e retorno das retentativas |
 | `hub.dlx` | direct | dead letter |
+
+## Antecipação para a Etapa 3 (2026-11-08)
+A base da mensageria foi trazida da Etapa 5 para a 3, para que bancos e registradoras cadastrados cheguem às réplicas já nesta etapa:
+- `OutboxRelay` (hub-starter-messaging): lê lotes com `FOR UPDATE SKIP LOCKED`, publica com publisher confirms e `mandatory`, só marca `published_at` com ACK e rota; falha reagenda com espera de 2^n s (máx. 5 min).
+- `ReliableMessageHandler`: ACK manual depois do commit; idempotência por `processed_messages`; `NonRetryableMessageException` vai direto para a DLQ; demais erros seguem os níveis de retry.
+- Réplicas aplicam o evento só se `version` for maior que a aplicada (`source_version`); a saúde da integração usa `checkedAt` como ordem própria.
+A Etapa 5 fica com o fluxo assíncrono do contrato sobre esta base.

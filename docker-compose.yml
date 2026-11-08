@@ -16,6 +16,7 @@ x-service: &service
       condition: service_healthy
   environment: &service-env
     AUTH_JWKS_URI: http://auth-service:8081/oauth2/jwks
+    RABBITMQ_HOST: rabbitmq
     TRACING_ENABLED: "true"
     OTLP_TRACING_ENDPOINT: http://jaeger:4318/v1/traces
     LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
@@ -175,6 +176,7 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/hub_bank
       DB_USERNAME: hub_bank
       DB_PASSWORD: ${HUB_BANK_DB_PASSWORD:-hub_bank}
+      LIQUIBASE_CONTEXTS: ${LIQUIBASE_CONTEXTS:-default,dev}
 
   registry-service:
     <<: *service
@@ -190,6 +192,7 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/hub_registry
       DB_USERNAME: hub_registry
       DB_PASSWORD: ${HUB_REGISTRY_DB_PASSWORD:-hub_registry}
+      LIQUIBASE_CONTEXTS: ${LIQUIBASE_CONTEXTS:-default,dev}
 
   contract-service:
     <<: *service
@@ -250,6 +253,7 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/hub_integration
       DB_USERNAME: hub_integration
       DB_PASSWORD: ${HUB_INTEGRATION_DB_PASSWORD:-hub_integration}
+      HUB_INTEGRATION_ENCRYPTION_KEY: ${HUB_INTEGRATION_ENCRYPTION_KEY:?defina HUB_INTEGRATION_ENCRYPTION_KEY no .env}
 
   notification-service:
     <<: *service

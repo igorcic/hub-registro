@@ -12,7 +12,7 @@
 
     <artifactId>hub-starter-messaging</artifactId>
     <name>hub-starter-messaging</name>
-    <description>Mensageria confiável: tabelas e gravação no Outbox (Etapas 1 e 2); relay, consumidores idempotentes, retry e DLQ (Etapa 5)</description>
+    <description>Mensageria confiável: Outbox (gravação e relay com publisher confirms), consumidores idempotentes, retry com backoff e DLQ</description>
 
     <dependencies>
         <dependency>
@@ -22,6 +22,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -42,6 +46,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

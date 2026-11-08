@@ -24,6 +24,22 @@ spring:
   threads:
     virtual:
       enabled: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:hub_app}
+    password: ${RABBITMQ_PASSWORD:hub_app_dev}
+    virtual-host: ${RABBITMQ_VHOST:hub}
+    # Relay do Outbox: só marca como publicado o que o broker confirmou e roteou.
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+    listener:
+      simple:
+        acknowledge-mode: manual
+        prefetch: 10
+        default-requeue-rejected: false
 
 server:
   port: ${SERVER_PORT:8086}
@@ -36,6 +52,9 @@ management:
         include: health,info,prometheus
   endpoint:
     health:
+    rabbit:
+      # Com o Outbox, broker fora do ar só atrasa a publicação: não tira o serviço do ar.
+      enabled: false
       probes:
         enabled: true
   metrics:
