@@ -41,9 +41,12 @@ function Json($text) { try { return $text | ConvertFrom-Json } catch { return $n
 
 # ---------- 1. Subir o ambiente ----------
 if (-not (Test-Path .env)) { Copy-Item .env.example .env; Log 'Criado .env a partir de .env.example' }
-Log 'docker compose up -d --build (a primeira vez demora: compila as 11 imagens)...'
-docker compose up -d --build 2>&1 | Out-File -Encoding utf8 compose-up.log
-Log "docker compose terminou com código $LASTEXITCODE (detalhes em compose-up.log)"
+Log 'docker compose build (a primeira vez demora: baixa dependências e compila o projeto uma vez)...'
+docker compose build 2>&1 | Out-File -Encoding utf8 compose-up.log
+if ($LASTEXITCODE -ne 0) { Log "FALHA no build das imagens (código $LASTEXITCODE). Veja compose-up.log"; exit 1 }
+Log 'docker compose up -d...'
+docker compose up -d 2>&1 | Out-File -Append -Encoding utf8 compose-up.log
+Log "docker compose up terminou com código $LASTEXITCODE (detalhes em compose-up.log)"
 
 # ---------- 2. Esperar os serviços ----------
 $servicos = [ordered]@{
