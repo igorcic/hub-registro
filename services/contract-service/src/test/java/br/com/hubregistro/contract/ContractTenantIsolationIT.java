@@ -75,7 +75,7 @@ class ContractTenantIsolationIT {
     @Test
     void bankCannotCreateContractForAnotherBank() {
         assertThatThrownBy(() -> asTenant("BANK", BANK_A, () -> insertContract(BANK_B, null, "ISO-X")))
-                .hasMessageContaining("row-level security");
+                .rootCause().hasMessageContaining("row-level security");
     }
 
     @Test
@@ -90,7 +90,7 @@ class ContractTenantIsolationIT {
     void registryCannotHandContractOverToAnotherRegistry() {
         assertThatThrownBy(() -> asTenant("REGISTRY", REGISTRY,
                 () -> jdbc.update("UPDATE contracts SET registry_id = ? WHERE external_id = 'ISO-A1'", UUID.randomUUID())))
-                .hasMessageContaining("row-level security");
+                .rootCause().hasMessageContaining("row-level security");
     }
 
     @Test
