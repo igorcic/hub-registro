@@ -8,8 +8,8 @@ Arquitetura em **microsserviços Spring Boot 3 (Java 21)**, um banco PostgreSQL 
 
 | Etapa | Escopo | Situação |
 | --- | --- | --- |
-| 1 | Arquitetura, estrutura dos projetos, banco de dados, infraestrutura local | Implementada · aguardando o primeiro `mvn verify` |
-| 2 | Autenticação, usuários, papéis, permissões, multi-tenancy | Implementada · aguardando o primeiro `mvn verify` |
+| 1 | Arquitetura, estrutura dos projetos, banco de dados, infraestrutura local | **Concluída** · `mvn verify` verde |
+| 2 | Autenticação, usuários, papéis, permissões, multi-tenancy | **Concluída** · `mvn verify` verde |
 | 3 | Bancos e registradoras | Próxima |
 | 4 | Contratos e documentos | — |
 | 5 | RabbitMQ, processamento assíncrono, Outbox | — |
@@ -18,8 +18,6 @@ Arquitetura em **microsserviços Spring Boot 3 (Java 21)**, um banco PostgreSQL 
 | 8 | Portais Angular | — |
 | 9 | Dashboards, relatórios, auditoria, observabilidade | — |
 | 10 | Testes, documentação, conteinerização final | — |
-
-> **Atenção:** até aqui o código foi escrito sem acesso ao Maven Central, então ainda não passou por compilação completa nem pelos testes do Maven. As migrações SQL e as regras de domínio (Java puro) foram verificadas à parte, num PostgreSQL real e com `javac`. A primeira tarefa antes da Etapa 3 é rodar `mvn verify` e corrigir o que aparecer.
 
 ## Estrutura
 
@@ -66,6 +64,12 @@ Ambiente completo (infraestrutura + serviços):
 ```bash
 cp .env.example .env
 docker compose up -d --build
+```
+
+No Windows, um script sobe tudo e testa a autenticação ponta a ponta pelo gateway (resultado em `smoke-test.log`):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\smoke-test.ps1
 ```
 
 Só a infraestrutura, para rodar os serviços pela IDE:
